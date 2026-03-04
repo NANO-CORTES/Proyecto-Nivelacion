@@ -1,0 +1,28 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: catalog-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/catalogdb
+    username: reto
+    password: reto
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: reto
+    password: reto
+
+security:
+  jwt:
+    secret: "CAMBIAR_ESTA_CLAVE_SUPER_LARGA_DE_32_CHARS_MINIMO_!!"
+    expiration-minutes: 15

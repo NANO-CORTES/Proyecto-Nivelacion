@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # 1. RUTA PARA AUTENTICACIÓN (Sin filtro para poder loguearnos)
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/auth/**
+          # ¡AQUÍ NO VA EL FILTRO! Así el login queda libre.
+
+        # 2. RUTA PARA PEDIDOS (Sprint 1)
+        - id: order-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/orders/**
+          filters:
+            - name: AuthenticationFilter # Este SÍ pide token
+
+        # 3. RUTA PARA EL CATÁLOGO (Sprint 2)
+        - id: catalog-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/catalog/**
+          filters:
+            - name: AuthenticationFilter # Este SÍ pide token

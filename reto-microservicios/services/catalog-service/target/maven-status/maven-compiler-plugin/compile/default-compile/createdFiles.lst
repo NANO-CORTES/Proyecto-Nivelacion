@@ -1,0 +1,17 @@
+com\reto\catalog_service\service\OrderEventConsumer.class
+com\reto\catalog_service\repository\ProductRepository.class
+com\reto\catalog_service\security\JwtAuthenticationFilter.class
+com\reto\catalog_service\listener\OrderEventListener.class
+com\reto\catalog_service\security\JwtProvider.class
+com\reto\catalog_service\CatalogServiceApplication.class
+com\reto\catalog_service\entity\ProductEntity.class
+com\reto\catalog_service\service\CatalogService.class
+com\reto\catalog_service\config\RabbitMQConfig.class
+com\reto\catalog_service\dto\OrderEventDTO.class
+com\reto\catalog_service\dto\StockValidationResponseDTO.class
+com\reto\catalog_service\dto\ProductResponseDTO.class
+com\reto\catalog_service\controller\CatalogController.class
+com\reto\catalog_service\dto\ProductRequestDTO.class
+com\reto\catalog_service\security\SecurityConfig.class
+com\reto\catalog_service\repository\ProcessedEventRepository.class
+com\reto\catalog_service\entity\ProcessedEventEntity.class

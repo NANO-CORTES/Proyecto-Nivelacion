@@ -1,0 +1,17 @@
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\entity\ProductEntity.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\security\JwtAuthenticationFilter.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\dto\OrderEventDTO.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\config\RabbitMQConfig.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\controller\CatalogController.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\listener\OrderEventListener.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\CatalogServiceApplication.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\service\CatalogService.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\security\JwtProvider.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\service\OrderEventConsumer.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\dto\ProductResponseDTO.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\entity\ProcessedEventEntity.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\security\SecurityConfig.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\dto\StockValidationResponseDTO.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\repository\ProcessedEventRepository.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\repository\ProductRepository.java
+C:\Users\felip\OneDrive\UNIVERSIDAD\INGENIERIA DE SOFTWARE\reto-microservicios\reto-microservicios\services\catalog-service\src\main\java\com\reto\catalog_service\dto\ProductRequestDTO.java
