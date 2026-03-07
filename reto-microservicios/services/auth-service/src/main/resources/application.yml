@@ -6,7 +6,7 @@ spring:
     name: auth-service
   
   datasource:
-    url: jdbc:postgresql://localhost:5433/authdb
+    url: jdbc:postgresql://localhost:5433/Auth_DB
     username: reto
     password: reto
     driver-class-name: org.postgresql.Driver

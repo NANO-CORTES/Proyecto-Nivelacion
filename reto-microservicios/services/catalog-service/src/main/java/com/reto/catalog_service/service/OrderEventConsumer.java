@@ -27,16 +27,14 @@ public class OrderEventConsumer {
     public void consumeOrderEvent(OrderEventDTO event) {
         String eventId = event.getEventId();
 
-        // 1. Verificar idempotencia
         if (processedEventRepository.existsById(eventId)) {
-            logger.info("El evento {} ya fue procesado. Ignorando.", eventId);
+            logger.info("El evento {} ya fue procesado", eventId);
             return;
         }
 
         logger.info("Procesando evento {}: orden {} para el producto {}", eventId, event.getOrderId(),
                 event.getProductId());
 
-        // 2. Procesar el evento según el estado
         boolean success = false;
         if ("CREATED".equals(event.getStatus())) {
             success = catalogService.deductStock(event.getProductId(), event.getQuantity());
@@ -60,10 +58,6 @@ public class OrderEventConsumer {
             return;
         }
 
-        // 3. Registrar el evento como procesado si todo salió bien o si falló por
-        // lógica de negocio (no por error del sistema).
-        // En este diseño básico, guardaremos el evento de todas formas para no
-        // reintentar un descuento de stock fallido.
         processedEventRepository.save(new ProcessedEventEntity(eventId));
         logger.info("Evento {} marcado como procesado exitosamente.", eventId);
     }

@@ -2,7 +2,7 @@ package com.reto.orders.dto;
 
 public class OrderRequestDTO {
     private String customerName;
-    private Double totalAmount;
+    private Long userId;
     private Long productId;
     private Integer quantity;
 
@@ -17,12 +17,12 @@ public class OrderRequestDTO {
         this.customerName = customerName;
     }
 
-    public Double getTotalAmount() {
-        return totalAmount;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setTotalAmount(Double totalAmount) {
-        this.totalAmount = totalAmount;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Long getProductId() {

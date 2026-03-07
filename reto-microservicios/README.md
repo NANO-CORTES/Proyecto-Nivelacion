@@ -1,125 +1,95 @@
-# Guía de Pruebas de Microservicios con Postman
+# 🚀 Plataforma de E-Commerce (Microservicios)
 
-Esta guía detalla los pasos para probar de extremo a extremo el ecosistema de microservicios.
+Este proyecto es una plataforma de comercio electrónico basada en una arquitectura de microservicios desarrollada con **Spring Boot 3**, **Java 21**, **PostgreSQL** y **RabbitMQ**.
 
-**NOTA IMPORTANTE:** Todas las peticiones deben realizarse al puerto **`8080`** (API Gateway). No contactes a los microservicios directamente por sus puertos individuales (8081, 8082, 8083) para garantizar que el enrutamiento y la seguridad (JWT) se apliquen correctamente.
+## 🏗 Arquitectura del Sistema
 
----
+El sistema está dividido en los siguientes módulos, todos enrutados a través de un **API Gateway**:
 
-## 1. Auth Service: Seguridad y Autenticación
-
-Antes de poder interactuar con el catálogo o los pedidos, necesitas registrarte e iniciar sesión para obtener un token JWT.
-
-### A. Registro de Usuario
-Crea un nuevo usuario en la base de datos.
-* **Método:** `POST`
-* **URL:** `http://localhost:8080/auth/register`
-* **Body (Raw -> JSON):**
-  ```json
-  {
-    "username": "usuario_prueba",
-    "password": "mi_clave_segura",
-    "role": "USER"
-  }
-  ```
-* **Resultado Esperado:** Un código de estado `200 OK` (o similar que confirme el registro).
-
-### B. Inicio de Sesión (Obtención del Token)
-Autentícate con el usuario recién creado para conseguir tu pase de acceso.
-* **Método:** `POST`
-* **URL:** `http://localhost:8080/auth/login`
-* **Body (Raw -> JSON):**
-  ```json
-  {
-    "username": "usuario_prueba",
-    "password": "mi_clave_segura"
-  }
-  ```
-* **Resultado Esperado:** Una respuesta que contenga un campo `"token"` con un string largo. **Copia este string**, lo necesitarás para los siguientes pasos.
+| Componente | Carpeta | Puerto Local | Base de Datos (Docker) | Descripción |
+| :--- | :--- | :--- | :--- | :--- |
+| **API Gateway** | `services/api-gateway` | `8080` | N/A | Punto de entrada único para los clientes. Enruta y valida tokens JWT. |
+| **Auth Service** | `services/auth-service` | `8081` | `Auth_DB` (`:5433`) | Emite tokens JWT y gestiona el registro y login de usuarios (`/auth/**`). |
+| **Catalog Service** | `services/catalog-service` | `8082` | `Catalog_DB` (`:5434`) | Gestiona el CRUD de productos, el stock y escucha eventos de órdenes (`/catalog/**`). |
+| **Order Service** | `services/order-service` | `8083` | `Order_DB` (`:5435`) | Procesamiento de órdenes. Emite eventos asíncronos para actualizar el catálogo (`/orders/**`). |
+| **Frontend** | `mi-frontend` | `4200` | N/A | Aplicación SPA construida en Angular para la interacción del usuario final. |
 
 ---
 
-## Configuración del Token en Postman
-Para las siguientes peticiones a los servicios de Catálogo y Pedidos, *siempre* debes incluir el token:
-1. Ve a la pestaña **Authorization** en tu petición de Postman.
-2. Selecciona el tipo **Bearer Token**.
-3. Pega el token que copiaste en el paso anterior en el campo correspondiente.
+## 🛠 Tecnologías Utilizadas
+
+*   **Lenguaje:** Java 21 / TypeScript
+*   **Frameworks Backend:** Spring Boot 3.2.x, Spring Cloud (Gateway, OpenFeign)
+*   **Framework Frontend:** Angular 17+
+*   **Persistencia:** PostgreSQL, Spring Data JPA, Hibernate
+*   **Mensajería Asíncrona:** RabbitMQ (Publicación/Suscripción y colas)
+*   **Seguridad:** Spring Security con JWT (JSON Web Tokens)
+*   **Infraestructura:** Docker & Docker Compose
 
 ---
 
-## 2. Catalog Service: Gestión de Productos
+## 🚀 Cómo Ejecutar el Proyecto Localmente
 
-### A. Crear un Producto
-Agrega un artículo al catálogo.
-* **Método:** `POST`
-* **URL:** `http://localhost:8080/catalog/products`
-* **Auth:** Bearer Token (Configurado como se indicó arriba)
-* **Body (Raw -> JSON):**
-  ```json
-  {
-    "sku": "PROD-001",
-    "name": "Laptop Gamer",
-    "price": 1200.50,
-    "stock": 10
-  }
-  ```
-* **Resultado Esperado:** El producto creado, y si revisas los logs, un evento se envía a RabbitMQ (dependiendo de la lógica implementada).
+### 1. Iniciar Infraestructura (Bases de datos y RabbitMQ)
+Asegúrate de tener Docker corriendo en tu sistema.
+Desde la raíz del proyecto (`reto-microservicios/reto-microservicios`):
+```bash
+docker-compose up -d
+```
+*Esto levantará 3 contenedores de PostgreSQL y 1 contenedor de RabbitMQ.*
 
-### B. Listar Productos
-Verifica que el producto se haya creado y obtén su información.
-* **Método:** `GET`
-* **URL:** `http://localhost:8080/catalog/products`
-* **Auth:** Bearer Token
-* **Resultado Esperado:** Un arreglo JSON (lista) con los productos, incluyendo el que acabas de crear. ¡Toma nota del `id` o `sku`!
+### 2. Ejecutar los Microservicios Backend
+Abre una terminal por cada uno de los microservicios y ejecuta el comando de inicio en su respectivo directorio:
 
-### C. Prueba de Conexión (Ping)
-Verifica que el servicio esté respondiendo.
-* **Método:** `GET`
-* **URL:** `http://localhost:8080/catalog/ping`
-* **Auth:** Bearer Token
-* **Resultado Esperado:** Mensaje de "Conexión exitosa" o similar. Si quitas el token, debería devolver `401 Unauthorized`.
+**API Gateway:**
+```bash
+cd services/api-gateway
+mvn spring-boot:run
+```
 
----
+**Auth Service:**
+```bash
+cd services/auth-service
+mvn spring-boot:run
+```
 
-## 3. Order Service: Gestión de Pedidos
+**Catalog Service:**
+```bash
+cd services/catalog-service
+mvn spring-boot:run
+```
 
-### A. Crear una Orden
-Realiza un pedido de un producto existente. *Asegúrate de que el producto exista en el Catálogo y tenga stock.*
-* **Método:** `POST`
-* **URL:** `http://localhost:8080/orders`
-* **Auth:** Bearer Token
-* **Body (Raw -> JSON):**
-  ```json
-  {
-    "items": [
-      {
-        "sku": "PROD-001",
-        "quantity": 2,
-        "price": 1200.50
-      }
-    ]
-  }
-  ```
-* **Resultado Esperado:** La creación de la orden con estado "PENDING" u "OPEN". Por detrás, este servicio debe comunicarse vía RabbitMQ (o llamada directa) para descontar el stock en el Catalog Service.
+**Order Service:**
+```bash
+cd services/order-service
+mvn spring-boot:run
+```
 
-### B. Listar Órdenes
-Verifica los pedidos que has realizado.
-* **Método:** `GET`
-* **URL:** `http://localhost:8080/orders`
-* **Auth:** Bearer Token
-* **Resultado Esperado:** Un arreglo con las órdenes registradas en la base de datos `orderdb`.
-
-### C. Prueba de Conexión (Ping)
-Verifica que el servicio de órdenes responda a través del gateway.
-* **Método:** `GET`
-* **URL:** `http://localhost:8080/orders/ping`
-* **Auth:** Bearer Token
-* **Resultado Esperado:** Mensaje de éxito si envías el token; error `401` si no lo envías.
+### 3. Ejecutar el Frontend
+Desde el directorio del frontend, instala las dependencias y corre el servidor de desarrollo:
+```bash
+cd mi-frontend
+npm install
+npm run start
+```
+El frontend estará disponible en `http://localhost:4200`.
 
 ---
 
-## Pruebas Adicionales Sugeridas
-Para confirmar que todo el ecosistema (y eventos) funciona correctamente:
-1. Crea un producto con 10 unidades de stock (Catalog).
-2. Crea una orden para comprar 3 unidades de ese producto (Order).
-3. Vuelve a consultar la lista de productos (`GET /catalog/products`) y verifica que el stock haya bajado a 7 (prueba la integración vía RabbitMQ).
+## 🔒 Autenticación y Endpoints Principales
+
+Para interactuar con el sistema a través de herramientas como Postman, recuerda siempre pasar por el **API Gateway en el puerto 8080**:
+
+### Obtener Token
+1. **Crear usuario:** `POST http://localhost:8080/auth/register` (Enviar JSON con username y password).
+2. **Login:** `POST http://localhost:8080/auth/login` (Obtienes el Token JWT).
+
+### Usar Endpoints Protegidos
+Agrega el token recibido en la cabecera (Header) de tus peticiones HTTP:
+*   `Authorization: Bearer <TU_TOKEN>`
+
+#### Catálogo y Órdenes
+*   **Crear Producto:** `POST http://localhost:8080/catalog/products` (Requiere rol ADMIN).
+*   **Listar Productos:** `GET http://localhost:8080/catalog/products` (No requiere token).
+*   **Crear Orden:** `POST http://localhost:8080/orders` (Requiere Token).
+*   **Cancelar Orden:** `DELETE http://localhost:8080/orders/{id}` (Requiere Token. Dispara evento a RabbitMQ para reponer stock).

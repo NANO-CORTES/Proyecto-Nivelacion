@@ -1,0 +1,9 @@
+target/
+.idea/
+*.jar
+*.class
+*.original
+node_modules/
+.DS_Store
+*.log
+.mvn/

@@ -5,7 +5,7 @@ spring:
   application:
     name: catalog-service
   datasource:
-    url: jdbc:postgresql://localhost:5433/catalogdb
+    url: jdbc:postgresql://localhost:5434/Catalog_DB
     username: reto
     password: reto
     driver-class-name: org.postgresql.Driver
@@ -26,3 +26,9 @@ security:
   jwt:
     secret: "CAMBIAR_ESTA_CLAVE_SUPER_LARGA_DE_32_CHARS_MINIMO_!!"
     expiration-minutes: 15
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import com.reto.orders.entity.OrderEntity;
 import com.reto.orders.dto.OrderRequestDTO;
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 @RestController
@@ -32,14 +33,16 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderEntity> createOrder(@RequestBody OrderRequestDTO request) {
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<?> createOrder(@RequestBody OrderRequestDTO request) {
         OrderEntity order = orderService.createOrder(request);
         return ResponseEntity.ok(order);
     }
 
-    @PutMapping("/{id}/cancel")
-    public ResponseEntity<OrderEntity> cancelOrder(@PathVariable Long id) {
-        OrderEntity order = orderService.cancelOrder(id);
-        return ResponseEntity.ok(order);
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<?> cancelOrder(@PathVariable Long id) {
+        orderService.cancelOrder(id);
+        return ResponseEntity.ok("Orden cancelada y stock restituido");
     }
 }

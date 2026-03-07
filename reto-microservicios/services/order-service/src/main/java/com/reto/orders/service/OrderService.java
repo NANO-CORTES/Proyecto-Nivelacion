@@ -2,6 +2,7 @@ package com.reto.orders.service;
 
 import com.reto.orders.client.CatalogClient;
 import com.reto.orders.dto.OrderRequestDTO;
+import com.reto.orders.dto.ProductResponseDTO;
 import com.reto.orders.dto.StockValidationResponseDTO;
 import com.reto.orders.entity.OrderEntity;
 import com.reto.orders.publisher.OrderEventPublisher;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import feign.FeignException;
 
 @Service
 public class OrderService {
@@ -35,15 +37,27 @@ public class OrderService {
 
     @Transactional
     public OrderEntity createOrder(OrderRequestDTO request) {
-        StockValidationResponseDTO validation = catalogClient.checkStock(request.getProductId(), request.getQuantity());
+        ProductResponseDTO product;
+        try {
+            product = catalogClient.checkStock(request.getProductId());
+        } catch (FeignException.NotFound e) {
+            throw new RuntimeException("Este producto no existe o no está en stock.");
+        }
 
-        if (!validation.isAvailable()) {
-            throw new RuntimeException("No hay stock suficiente: " + validation.getMessage());
+        if (product == null) {
+            throw new RuntimeException("Este producto no existe o no está en stock.");
+        }
+
+        if (product.getStock() == null || product.getStock() < request.getQuantity()) {
+            throw new RuntimeException("No hay stock suficiente");
         }
 
         OrderEntity order = new OrderEntity();
         order.setCustomerName(request.getCustomerName());
-        order.setTotalAmount(request.getTotalAmount());
+
+        Double total = product.getPrice() * request.getQuantity();
+        order.setTotalAmount(total);
+        order.setUserId(request.getUserId());
         order.setProductId(request.getProductId());
         order.setQuantity(request.getQuantity());
         order.setStatus("CREATED");

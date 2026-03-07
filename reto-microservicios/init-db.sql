@@ -1,2 +1,0 @@
-CREATE DATABASE catalogdb;
-CREATE DATABASE orderdb;

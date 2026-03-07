@@ -10,11 +10,23 @@ public class OrderEntity {
     private Long id;
     private String customerName;
     private Double totalAmount;
+    @Column(nullable = false)
+    private Long userId;
+    @Column(nullable = false)
     private Long productId;
+    @Column(nullable = false)
     private Integer quantity;
+    @Column(nullable = false)
     private String status; // CREATED, CANCELLED
 
     public OrderEntity() {
+    }
+
+    public OrderEntity(Long id, Long productId, Integer quantity, String status) {
+        this.id = id;
+        this.productId = productId;
+        this.quantity = quantity;
+        this.status = status;
     }
 
     public Long getId() {
@@ -39,6 +51,14 @@ public class OrderEntity {
 
     public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Long getProductId() {

@@ -1,18 +1,39 @@
-version: '3.8'
-
 services:
-  postgres:
+  auth-db:
     image: postgres:16
-    container_name: reto_postgres
+    container_name: reto_auth_db
     environment:
       POSTGRES_USER: reto
       POSTGRES_PASSWORD: reto
-      POSTGRES_DB: authdb 
+      POSTGRES_DB: Auth_DB
     ports:
       - "5433:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - auth_pgdata:/var/lib/postgresql/data
+
+  catalog-db:
+    image: postgres:16
+    container_name: reto_catalog_db
+    environment:
+      POSTGRES_USER: reto
+      POSTGRES_PASSWORD: reto
+      POSTGRES_DB: Catalog_DB
+    ports:
+      - "5434:5432"
+    volumes:
+      - catalog_pgdata:/var/lib/postgresql/data
+
+  order-db:
+    image: postgres:16
+    container_name: reto_order_db
+    environment:
+      POSTGRES_USER: reto
+      POSTGRES_PASSWORD: reto
+      POSTGRES_DB: Order_DB
+    ports:
+      - "5435:5432"
+    volumes:
+      - order_pgdata:/var/lib/postgresql/data
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -25,4 +46,6 @@ services:
       RABBITMQ_DEFAULT_PASS: reto
 
 volumes:
-  pgdata:
+  auth_pgdata:
+  catalog_pgdata:
+  order_pgdata:
