@@ -1,18 +1,22 @@
 package com.reto.orders.service;
 
 import com.reto.orders.client.CatalogClient;
+import com.reto.orders.dto.OrderItemRequestDTO;
+import com.reto.orders.dto.OrderItemEventDTO;
 import com.reto.orders.dto.OrderRequestDTO;
 import com.reto.orders.dto.ProductResponseDTO;
-import com.reto.orders.dto.StockValidationResponseDTO;
 import com.reto.orders.entity.OrderEntity;
+import com.reto.orders.entity.OrderItemEntity;
 import com.reto.orders.publisher.OrderEventPublisher;
 import com.reto.orders.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import feign.FeignException;
 
 @Service
@@ -37,36 +41,55 @@ public class OrderService {
 
     @Transactional
     public OrderEntity createOrder(OrderRequestDTO request) {
-        ProductResponseDTO product;
-        try {
-            product = catalogClient.checkStock(request.getProductId());
-        } catch (FeignException.NotFound e) {
-            throw new RuntimeException("Este producto no existe o no está en stock.");
-        }
-
-        if (product == null) {
-            throw new RuntimeException("Este producto no existe o no está en stock.");
-        }
-
-        if (product.getStock() == null || product.getStock() < request.getQuantity()) {
-            throw new RuntimeException("No hay stock suficiente");
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "La orden debe contener al menos un producto.");
         }
 
         OrderEntity order = new OrderEntity();
         order.setCustomerName(request.getCustomerName());
-
-        Double total = product.getPrice() * request.getQuantity();
-        order.setTotalAmount(total);
         order.setUserId(request.getUserId());
-        order.setProductId(request.getProductId());
-        order.setQuantity(request.getQuantity());
         order.setStatus("CREATED");
+        double totalAmount = 0.0;
 
+        List<OrderItemEventDTO> eventItems = new ArrayList<>();
+
+        for (OrderItemRequestDTO itemRequest : request.getItems()) {
+            ProductResponseDTO product;
+            try {
+                product = catalogClient.checkStock(itemRequest.getProductId());
+            } catch (FeignException.NotFound e) {
+                throw new RuntimeException("El producto con ID " + itemRequest.getProductId() + " no existe o no está en stock.");
+            }
+
+            if (product == null) {
+                throw new RuntimeException("El producto con ID " + itemRequest.getProductId() + " no existe o no está en stock.");
+            }
+
+            if (itemRequest.getQuantity() == null || itemRequest.getQuantity() <= 0) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST, "La cantidad solicitada debe ser mayor a cero.");
+            }
+
+            if (product.getStock() == null || product.getStock() < itemRequest.getQuantity()) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.CONFLICT, "No hay stock suficiente para el producto: " + product.getName());
+            }
+
+            double itemTotal = product.getPrice() * itemRequest.getQuantity();
+            totalAmount += itemTotal;
+
+            OrderItemEntity orderItem = new OrderItemEntity(order, itemRequest.getProductId(), itemRequest.getQuantity(), product.getPrice());
+            order.addItem(orderItem);
+
+            eventItems.add(new OrderItemEventDTO(itemRequest.getProductId(), itemRequest.getQuantity()));
+        }
+
+        order.setTotalAmount(totalAmount);
         order = orderRepository.save(order);
 
         String correlationId = UUID.randomUUID().toString();
-        orderEventPublisher.publishOrderCreatedEvent(order.getId(), order.getProductId(), order.getQuantity(),
-                correlationId);
+        orderEventPublisher.publishOrderCreatedEvent(order.getId(), eventItems, correlationId);
 
         return order;
     }
@@ -83,9 +106,12 @@ public class OrderService {
         order.setStatus("CANCELLED");
         order = orderRepository.save(order);
 
+        List<OrderItemEventDTO> eventItems = order.getItems().stream()
+                .map(item -> new OrderItemEventDTO(item.getProductId(), item.getQuantity()))
+                .collect(Collectors.toList());
+
         String correlationId = UUID.randomUUID().toString();
-        orderEventPublisher.publishOrderCancelledEvent(order.getId(), order.getProductId(), order.getQuantity(),
-                correlationId);
+        orderEventPublisher.publishOrderCancelledEvent(order.getId(), eventItems, correlationId);
 
         return order;
     }

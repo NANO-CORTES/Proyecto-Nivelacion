@@ -27,6 +27,10 @@ security:
     secret: "CAMBIAR_ESTA_CLAVE_SUPER_LARGA_DE_32_CHARS_MINIMO_!!"
     expiration-minutes: 15
 
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} [%X{correlationId}] - %msg%n"
+
 management:
   endpoints:
     web:

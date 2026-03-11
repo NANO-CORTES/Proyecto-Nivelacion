@@ -1,10 +1,11 @@
 package com.reto.orders.dto;
 
+import java.util.List;
+
 public class OrderEventDTO {
     private String eventId;
     private Long orderId;
-    private Long productId;
-    private Integer quantity;
+    private List<OrderItemEventDTO> items;
     private String correlationId;
     private String status;
 
@@ -27,20 +28,12 @@ public class OrderEventDTO {
         this.orderId = orderId;
     }
 
-    public Long getProductId() {
-        return productId;
+    public List<OrderItemEventDTO> getItems() {
+        return items;
     }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    public void setItems(List<OrderItemEventDTO> items) {
+        this.items = items;
     }
 
     public String getCorrelationId() {

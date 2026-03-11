@@ -1,6 +1,8 @@
 package com.reto.orders.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -12,20 +14,18 @@ public class OrderEntity {
     private Double totalAmount;
     @Column(nullable = false)
     private Long userId;
-    @Column(nullable = false)
-    private Long productId;
-    @Column(nullable = false)
-    private Integer quantity;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItemEntity> items = new ArrayList<>();
+
     @Column(nullable = false)
     private String status; // CREATED, CANCELLED
 
     public OrderEntity() {
     }
 
-    public OrderEntity(Long id, Long productId, Integer quantity, String status) {
+    public OrderEntity(Long id, String status) {
         this.id = id;
-        this.productId = productId;
-        this.quantity = quantity;
         this.status = status;
     }
 
@@ -61,20 +61,22 @@ public class OrderEntity {
         this.userId = userId;
     }
 
-    public Long getProductId() {
-        return productId;
+    public List<OrderItemEntity> getItems() {
+        return items;
     }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
+    public void setItems(List<OrderItemEntity> items) {
+        this.items = items;
     }
 
-    public Integer getQuantity() {
-        return quantity;
+    public void addItem(OrderItemEntity item) {
+        items.add(item);
+        item.setOrder(this);
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    public void removeItem(OrderItemEntity item) {
+        items.remove(item);
+        item.setOrder(null);
     }
 
     public String getStatus() {

@@ -1,10 +1,11 @@
 package com.reto.orders.dto;
 
+import java.util.List;
+
 public class OrderRequestDTO {
     private String customerName;
     private Long userId;
-    private Long productId;
-    private Integer quantity;
+    private List<OrderItemRequestDTO> items;
 
     public OrderRequestDTO() {
     }
@@ -25,19 +26,11 @@ public class OrderRequestDTO {
         this.userId = userId;
     }
 
-    public Long getProductId() {
-        return productId;
+    public List<OrderItemRequestDTO> getItems() {
+        return items;
     }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    public void setItems(List<OrderItemRequestDTO> items) {
+        this.items = items;
     }
 }

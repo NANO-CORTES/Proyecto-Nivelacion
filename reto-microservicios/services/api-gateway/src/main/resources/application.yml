@@ -6,6 +6,7 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+
       routes:
         # 1. RUTA PARA AUTENTICACIÓN (Sin filtro para poder loguearnos)
         - id: auth-service
@@ -29,3 +30,17 @@ spring:
             - Path=/catalog/**
           filters:
             - name: AuthenticationFilter # Este SÍ pide token
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} [%X{correlationId}] - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

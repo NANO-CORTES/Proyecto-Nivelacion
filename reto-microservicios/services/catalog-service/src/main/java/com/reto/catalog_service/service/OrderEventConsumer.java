@@ -32,33 +32,41 @@ public class OrderEventConsumer {
             return;
         }
 
-        logger.info("Procesando evento {}: orden {} para el producto {}", eventId, event.getOrderId(),
-                event.getProductId());
+        logger.info("Procesando evento {}: orden {}", eventId, event.getOrderId());
 
         boolean success = false;
-        if ("CREATED".equals(event.getStatus())) {
-            success = catalogService.deductStock(event.getProductId(), event.getQuantity());
-            if (success) {
-                logger.info("Stock descontado para el producto {}. Candidad: {}", event.getProductId(),
-                        event.getQuantity());
-            } else {
-                logger.warn("No se pudo descontar stock para el producto {}. Puede que no haya suficiente.",
-                        event.getProductId());
+        try {
+            if (event.getCorrelationId() != null) {
+                org.slf4j.MDC.put("correlationId", event.getCorrelationId());
             }
-        } else if ("CANCELLED".equals(event.getStatus())) {
-            success = catalogService.replenishStock(event.getProductId(), event.getQuantity());
-            if (success) {
-                logger.info("Stock repuesto para el producto {}. Candidad: {}", event.getProductId(),
-                        event.getQuantity());
-            } else {
-                logger.warn("No se pudo reponer stock para el producto {}.", event.getProductId());
-            }
-        } else {
-            logger.warn("Estado de evento desconocido: {}", event.getStatus());
-            return;
-        }
 
-        processedEventRepository.save(new ProcessedEventEntity(eventId));
-        logger.info("Evento {} marcado como procesado exitosamente.", eventId);
+            if ("CREATED".equals(event.getStatus())) {
+                for (var item : event.getItems()) {
+                    success = catalogService.deductStock(item.getProductId(), item.getQuantity());
+                    if (success) {
+                        logger.info("Stock descontado para el producto {}. Candidad: {}", item.getProductId(), item.getQuantity());
+                    } else {
+                        logger.warn("No se pudo descontar stock para el producto {}. Puede que no haya suficiente.", item.getProductId());
+                    }
+                }
+            } else if ("CANCELLED".equals(event.getStatus())) {
+                for (var item : event.getItems()) {
+                    success = catalogService.replenishStock(item.getProductId(), item.getQuantity());
+                    if (success) {
+                        logger.info("Stock repuesto para el producto {}. Candidad: {}", item.getProductId(), item.getQuantity());
+                    } else {
+                        logger.warn("No se pudo reponer stock para el producto {}.", item.getProductId());
+                    }
+                }
+            } else {
+                logger.warn("Estado de evento desconocido: {}", event.getStatus());
+                return;
+            }
+
+            processedEventRepository.save(new ProcessedEventEntity(eventId));
+            logger.info("Evento {} marcado como procesado exitosamente.", eventId);
+        } finally {
+            org.slf4j.MDC.remove("correlationId");
+        }
     }
 }
