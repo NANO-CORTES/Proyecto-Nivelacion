@@ -5,7 +5,6 @@ import { CatalogService, Product } from './services/catalog.service';
 import { OrderService, OrderResponse } from './services/order.service';
 import { CommonModule } from '@angular/common';
 
-// An item in the shopping cart
 export interface CartItem {
   product: Product;
   quantity: number;
@@ -21,7 +20,6 @@ export interface CartItem {
 export class App implements OnInit {
   title = 'mi-frontend';
 
-  // State
   isLoggedIn = false;
   isAdmin = false;
   isLoginView = true;
@@ -122,9 +120,8 @@ export class App implements OnInit {
     this.orderService.getOrders().subscribe({
       next: (data: OrderResponse[]) => {
         if (this.isAdmin) {
-          this.orders = data; // admin sees all
+          this.orders = data;
         } else {
-          // regular user: filter by username (customerName from token)
           this.orders = data.filter(o => o.customerName === this.customerName);
         }
       },

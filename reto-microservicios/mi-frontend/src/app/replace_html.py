@@ -15,7 +15,6 @@ replacement = '''<div class="order-meta" style="display: flex; flex-direction: c
   </div>
 </div>'''
 
-# re.sub with string replacement
 new_content, count = pattern.subn(replacement, content)
 
 print(f"Replaced {count} times.")

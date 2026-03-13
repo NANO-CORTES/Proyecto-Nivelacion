@@ -1,0 +1,160 @@
+EXPLICACIÓN DE LA CONFIGURACIÓN DE MICROSERVICIOS Y ANGULAR
+===============================================================
+
+Esta documentación explica cómo se aseguró la conexión entre los microservicios y Angular, la configuración de CORS en el API Gateway, la creación del AuthInterceptor para JWT y Correlation ID, y la ubicación de cada módulo en el proyecto.
+
+1. CONEXIÓN ENTRE MICROSERVICIOS Y ANGULAR
+==========================================
+
+La comunicación se asegura a través del API Gateway como punto de entrada único. Angular no se conecta directamente a cada microservicio (que corren en puertos separados), sino que todo pasa por el gateway en localhost:8080. Esto simplifica el frontend y permite enrutamiento centralizado.
+
+Cómo funciona:
+- Angular envía requests HTTP a rutas como http://localhost:8080/auth/login o http://localhost:8080/catalog/products.
+- El API Gateway (Spring Cloud Gateway) recibe la petición y la reenvía al microservicio correspondiente basado en rutas configuradas (ej. /auth/** → auth-service en puerto 8081).
+- Los microservicios responden al gateway, que devuelve la respuesta a Angular.
+- Esto se configura en services/api-gateway/src/main/resources/application.yml con rutas como:
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/auth/**
+        - id: catalog-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/catalog/**
+        - id: order-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/orders/**
+
+Ubicación: services/api-gateway/src/main/resources/application.yml.
+
+Esto garantiza que Angular solo conozca una URL base (http://localhost:8080), y el gateway maneja la distribución interna.
+
+2. CONFIGURACIÓN DE CORS EN EL API GATEWAY
+==========================================
+
+CORS (Cross-Origin Resource Sharing) permite que Angular (que corre en http://localhost:4200 por defecto) haga requests al gateway sin bloqueos del navegador.
+
+Cómo se configuró:
+- En el API Gateway, se añade una configuración global de CORS en una clase Java dedicada.
+- Archivo: services/api-gateway/src/main/java/com/reto/apigateway/config/CorsConfig.java (o similar, si no existe, se crea).
+- Ejemplo de configuración:
+
+@Configuration
+public class CorsConfig {
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.setAllowedOriginPatterns(Arrays.asList("*")); // O especifica "http://localhost:4200"
+        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        corsConfig.setAllowedHeaders(Arrays.asList("*"));
+        corsConfig.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+        return new CorsWebFilter(source);
+    }
+}
+
+Esto permite requests desde cualquier origen (o uno específico) y métodos comunes. Se aplica a todas las rutas (/**).
+
+Ubicación: services/api-gateway/src/main/java/com/reto/apigateway/config/CorsConfig.java.
+
+Sin esto, el navegador bloquearía las llamadas de Angular al gateway.
+
+3. CREACIÓN DEL AUTHINTERCEPTOR PARA JWT TOKEN Y CORRELATION ID AUTOMÁTICA
+==========================================================================
+
+El AuthInterceptor es un interceptor HTTP en Angular que automáticamente añade el JWT token a cada request y genera una Correlation ID para rastreo.
+
+Cómo se creó:
+- Es una clase que implementa HttpInterceptor de Angular.
+- Archivo: mi-frontend/src/app/interceptors/auth.interceptor.ts.
+- Código clave:
+
+import { Injectable } from '@angular/core';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class AuthInterceptor implements HttpInterceptor {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const token = localStorage.getItem('auth_token');
+    const correlationId = this.generateCorrelationId(); // Genera un ID único
+
+    let headers = req.headers;
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    headers = headers.set('X-Correlation-ID', correlationId);
+
+    const clonedReq = req.clone({ headers });
+    return next.handle(clonedReq);
+  }
+
+  private generateCorrelationId(): string {
+    return 'corr-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  }
+}
+
+JWT Token: Se lee del localStorage y se añade al header Authorization como Bearer <token>. Los microservicios validan esto con Spring Security.
+
+Correlation ID: Se genera automáticamente (usando timestamp y random) y se añade al header X-Correlation-ID. Esto ayuda a rastrear requests en logs de microservicios.
+
+Se registra en mi-frontend/src/app/app.config.ts:
+
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './interceptors/auth.interceptor';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient(withInterceptors([authInterceptor])),
+    // ...
+  ]
+};
+
+Ubicación: mi-frontend/src/app/interceptors/auth.interceptor.ts y registrado en mi-frontend/src/app/app.config.ts.
+
+Esto asegura que todos los requests de Angular incluyan autenticación y un ID de correlación sin código manual en cada servicio.
+
+4. UBICACIÓN DE CADA MÓDULO
+==========================
+
+Frontend (Angular):
+- Todo el código de la app: mi-frontend/src/app/.
+  - Componentes principales: app.ts, app.html, app.css.
+  - Servicios: services/auth.service.ts, services/catalog.service.ts, etc.
+  - Interceptores: interceptors/auth.interceptor.ts.
+  - Configuración: app.config.ts, app.routes.ts.
+
+API Gateway:
+- Código: services/api-gateway/src/main/java/com/reto/apigateway/.
+  - Configuración de rutas y CORS: src/main/resources/application.yml y clases en config/.
+
+Auth Service:
+- Código: services/auth-service/src/main/java/com/ejemplo/demo/ (o com/reto/ en algunos archivos).
+  - Controladores: controller/AuthController.java.
+  - Servicios: service/AuthService.java.
+  - Entidades: entity/User.java.
+  - Configuración: src/main/resources/application.yml.
+
+Catalog Service:
+- Código: services/catalog-service/src/main/java/com/reto/catalog_service/.
+  - Controladores: controller/CatalogController.java.
+  - Servicios: service/CatalogService.java.
+  - Entidades: entity/ProductEntity.java.
+
+Order Service:
+- Código: services/order-service/src/main/java/com/reto/orders/.
+  - Controladores: controller/OrderController.java.
+  - Servicios: service/OrderService.java.
+  - Entidades: entity/OrderEntity.java.
+
+Docker y Configuración Global:
+- docker-compose.yml: Define contenedores para servicios, bases de datos y puertos.
+- README.md: Documentación general.

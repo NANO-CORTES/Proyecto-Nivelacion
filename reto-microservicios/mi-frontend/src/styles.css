@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Dynamic Modern Palette */
+  
   --primary-color: #6366f1;
   --primary-hover: #4f46e5;
   --success-color: #10b981;
@@ -9,30 +9,30 @@
   --danger-color: #ef4444;
   --danger-hover: #dc2626;
   
-  /* Neutral & Backgrounds */
+  
   --bg-color: #f8fafc;
   --card-bg: rgba(255, 255, 255, 0.7);
   --input-bg: rgba(255, 255, 255, 0.9);
   
-  /* Text */
+  
   --text-dark: #0f172a;
   --text-muted: #64748b;
   --text-light: #ffffff;
   
-  /* Borders & Shadows */
+  
   --border-color: rgba(226, 232, 240, 0.8);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   
-  /* Radii */
+  
   --radius-sm: 0.375rem;
   --radius-md: 0.75rem;
   --radius-lg: 1.25rem;
   --radius-full: 9999px;
   
-  /* Transitions */
+  
   --transition-fast: 0.15s ease-in-out;
   --transition-normal: 0.3s ease;
 }
@@ -59,7 +59,7 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
 }
 
-/* Base button styles */
+
 button {
   font-family: inherit;
   padding: 0.75rem 1.5rem;
@@ -133,7 +133,7 @@ button:disabled {
   font-size: 1.1rem;
 }
 
-/* Glassmorphism utilities */
+
 .glass-panel {
   background: var(--card-bg);
   backdrop-filter: blur(16px);
@@ -143,7 +143,7 @@ button:disabled {
   border-radius: var(--radius-lg);
 }
 
-/* Animations */
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
@@ -153,7 +153,7 @@ button:disabled {
   animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Form Styles Global */
+
 .form-group {
   margin-bottom: 1.25rem;
   display: flex;
@@ -192,3 +192,4 @@ button:disabled {
 .error-border:focus {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
 }
+
