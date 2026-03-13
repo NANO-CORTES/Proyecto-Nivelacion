@@ -42,7 +42,6 @@ export class App implements OnInit {
     username: new FormControl('', [Validators.required]),
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(4)]),
-    role: new FormControl('USER', [Validators.required]),
   });
 
   productForm = new FormGroup({
@@ -92,7 +91,7 @@ export class App implements OnInit {
 
   onRegister(): void {
     if (this.registerForm.valid) {
-      this.authService.register(this.registerForm.value as any).subscribe({
+      this.authService.register({ ...this.registerForm.value, role: 'USER' } as any).subscribe({
         next: (res: any) => {
           alert('¡Registro Exitoso! Ahora puedes iniciar sesión.');
           this.toggleAuthView();

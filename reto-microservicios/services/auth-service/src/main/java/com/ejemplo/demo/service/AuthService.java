@@ -26,6 +26,11 @@ public class AuthService {
         if (user.getRole() == null || user.getRole().isEmpty()) {
             user.setRole("ROLE_USER");
         } else if (user.getRole().equalsIgnoreCase("ROLE_ADMIN") || user.getRole().equalsIgnoreCase("ADMIN")) {
+            // Validar que el correo sea ejemplo@admin.com para registrarse como admin
+            if (!"ejemplo@admin.com".equals(user.getEmail())) {
+                throw new RuntimeException("Para registrarse como administrador, el correo debe ser ejemplo@admin.com");
+            }
+            user.setUsername("@admin"); // Establecer username fijo para admin
             user.setRole("ROLE_ADMIN");
         } else {
             // Cualquier otro valor (USER, ROLE_USER, user, etc.) → ROLE_USER
